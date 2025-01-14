@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 15px 0;
+    }
+
+    header img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      color: #4caf50;
+      margin: 0;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 350px;
+      margin: 30px auto;
+      flex-grow: 1;
+    }
+
+    label {
+      font-size: 16px;
+      margin-bottom: 10px;
+      display: block;
+      color: #555;
+    }
+
+    input {
+      width: calc(100% - 20px);
+      padding: 10px;
+      font-size: 14px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    p {
+      font-size: 16px;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 0;
+      margin-top: auto;
+    }
+
+    footer span {
+      color: #e25555;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section with Logo -->
+  <header>
+    <img src="https://via.placeholder.com/80" alt="Logo" id="logo">
+    <h1>Image Compressor</h1>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1>Upload and Compress Image</h1>
+    
+    <!-- Image Upload Section -->
+    <label for="fileUpload">Upload Image:</label>
+    <input type="file" id="fileUpload" accept="image/*">
+    <p id="fileInfo"></p>
+
+    <!-- Compress Button -->
+    <button id="compressBtn" style="display: none;" onclick="compress()">Compress and Download</button>
+  </div>
+
+  <!-- Footer Section -->
+  <footer>
+    Made by <span>❤️</span>
+  </footer>
+
+  <script>
+    let uploadedImage = null; // To store the uploaded image data
+
+    // Handle file upload
+    document.getElementById('fileUpload').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const fileInfo = document.getElementById('fileInfo');
+      const compressBtn = document.getElementById('compressBtn');
+
+      if (file) {
+        // Display file info
+        const fileSizeInMb = (file.size / (1024 * 1024)).toFixed(2);
+        fileInfo.textContent = `Uploaded File: ${file.name}, Size: ${fileSizeInMb} MB`;
+
+        // Read the uploaded image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedImage = new Image();
+          uploadedImage.src = e.target.result;
+
+          // Show the compress button
+          compressBtn.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        fileInfo.textContent = "No file selected.";
+        compressBtn.style.display = "none";
+      }
+    });
+
+    // Compress and download the image
+    function compress() {
+      if (!uploadedImage) {
+        alert("Please upload an image first.");
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Set desired compression dimensions (e.g., half the original size)
+      const maxWidth = 800; // Adjust as needed
+      const maxHeight = 800; // Adjust as needed
+      let width = uploadedImage.width;
+      let height = uploadedImage.height;
+
+      // Maintain aspect ratio
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+
+      // Set canvas dimensions
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw the image on the canvas
+      ctx.drawImage(uploadedImage, 0, 0, width, height);
+
+      // Convert canvas to compressed data URL
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Quality = 0.7 (adjust as needed)
+
+      // Create a download link for the compressed image
+      const downloadLink = document.createElement('a');
+      downloadLink.href = compressedDataUrl;
+      downloadLink.download = 'compressed-image.jpg';
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+
+      // Trigger the download
+      downloadLink.click();
+
+      // Clean up
+      document.body.removeChild(downloadLink);
+    }
+  </script>
+</body>
+</html>
